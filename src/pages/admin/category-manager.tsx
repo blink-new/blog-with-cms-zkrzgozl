@@ -1,28 +1,90 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Plus, Edit2, Trash2, Save } from 'lucide-react'
+import { Plus, Edit2, Trash2, Save, X } from 'lucide-react'
+import { postStore } from '@/lib/posts'
+import { toast } from '@/components/ui/use-toast'
+import { Category } from '@/lib/types'
 
 export default function CategoryManager() {
-  const [categories] = useState([
-    { id: 1, name: 'Technology', slug: 'technology', description: 'Tech-related posts', postCount: 5 },
-    { id: 2, name: 'Design', slug: 'design', description: 'Design and UX posts', postCount: 3 },
-    { id: 3, name: 'Business', slug: 'business', description: 'Business insights', postCount: 4 },
-  ])
-
-  const [newCategory, setNewCategory] = useState({
+  const [categories, setCategories] = useState<(Category & { postCount: number })[]>([])
+  const [editingId, setEditingId] = useState<string | null>(null)
+  
+  const [formData, setFormData] = useState({
     name: '',
-    slug: '',
     description: ''
   })
 
+  useEffect(() => {
+    loadCategories()
+  }, [])
+
+  const loadCategories = () => {
+    const stats = postStore.getStats()
+    setCategories(stats.postsByCategory)
+  }
+
+  const resetForm = () => {
+    setFormData({ name: '', description: '' })
+    setEditingId(null)
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('New category:', newCategory)
+    
+    try {
+      if (editingId) {
+        postStore.updateCategory(editingId, formData)
+        toast({
+          title: "Success",
+          description: "Category updated successfully",
+        })
+      } else {
+        postStore.createCategory(formData)
+        toast({
+          title: "Success",
+          description: "Category created successfully",
+        })
+      }
+      
+      loadCategories()
+      resetForm()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to save category",
+        variant: "destructive",
+      })
+    }
+  }
+
+  const handleEdit = (category: Category) => {
+    setEditingId(category.id)
+    setFormData({
+      name: category.name,
+      description: category.description || ''
+    })
+  }
+
+  const handleDelete = (id: string) => {
+    try {
+      postStore.deleteCategory(id)
+      toast({
+        title: "Success",
+        description: "Category deleted successfully",
+      })
+      loadCategories()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to delete category",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
@@ -32,13 +94,15 @@ export default function CategoryManager() {
           <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             Categories
           </h2>
-          <p className="text-white/70">Manage your content categories.</p>
+          <p className="text-white/70">Manage your content categories</p>
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="glass-card p-6">
-          <h3 className="text-xl font-semibold mb-6 text-white">Add New Category</h3>
+          <h3 className="text-xl font-semibold mb-6 text-white">
+            {editingId ? 'Edit Category' : 'Add New Category'}
+          </h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="name" className="text-white">Name</Label>
@@ -46,18 +110,8 @@ export default function CategoryManager() {
                 id="name"
                 placeholder="Category name"
                 className="glass mt-1"
-                value={newCategory.name}
-                onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="slug" className="text-white">Slug</Label>
-              <Input
-                id="slug"
-                placeholder="category-slug"
-                className="glass mt-1"
-                value={newCategory.slug}
-                onChange={(e) => setNewCategory({ ...newCategory, slug: e.target.value })}
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
             </div>
             <div>
@@ -66,14 +120,26 @@ export default function CategoryManager() {
                 id="description"
                 placeholder="Category description"
                 className="glass mt-1"
-                value={newCategory.description}
-                onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               />
             </div>
-            <Button type="submit" className="w-full glass-button">
-              <Save className="mr-2 h-4 w-4" />
-              Create Category
-            </Button>
+            <div className="flex gap-2">
+              <Button type="submit" className="flex-1 glass-button">
+                <Save className="mr-2 h-4 w-4" />
+                {editingId ? 'Update Category' : 'Create Category'}
+              </Button>
+              {editingId && (
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  onClick={resetForm}
+                  className="glass-button"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
           </form>
         </div>
 
@@ -94,18 +160,39 @@ export default function CategoryManager() {
                       <span className="text-white/30">•</span>
                       <span className="text-sm text-white/70">{category.postCount} posts</span>
                     </div>
+                    {category.description && (
+                      <p className="text-sm text-white/50 mt-1">{category.description}</p>
+                    )}
                   </div>
                   <div className="flex gap-2">
-                    <Button size="sm" variant="ghost" className="glass-button">
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="glass-button"
+                      onClick={() => handleEdit(category)}
+                    >
                       <Edit2 className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="ghost" className="glass-button text-red-400">
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="glass-button text-red-400"
+                      onClick={() => handleDelete(category.id)}
+                      disabled={category.postCount > 0}
+                      title={category.postCount > 0 ? "Cannot delete category with posts" : "Delete category"}
+                    >
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
               </div>
             ))}
+            
+            {categories.length === 0 && (
+              <div className="text-center py-8 text-white/50">
+                No categories yet. Create your first category to get started.
+              </div>
+            )}
           </div>
         </div>
       </div>
