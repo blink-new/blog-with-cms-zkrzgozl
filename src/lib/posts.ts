@@ -1,175 +1,103 @@
 
-export interface Post {
-  id: string
-  title: string
-  content: string
-  excerpt: string
-  slug: string
-  categoryId: string
-  coverImage?: string
-  createdAt: string
-  updatedAt: string
+interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  coverImage?: string;
+  categoryId: string;
+  createdAt: string;
 }
 
-export interface Category {
-  id: string
-  name: string
-  slug: string
-  description: string
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
 }
 
 class PostStore {
-  private storageKey = 'blog-posts'
-  private categoryKey = 'blog-categories'
+  private posts: Post[] = [];
+  private categories: Category[] = [];
 
-  private generateSlug(title: string): string {
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
+  constructor() {
+    // Load from localStorage if available
+    const savedPosts = localStorage.getItem('posts');
+    const savedCategories = localStorage.getItem('categories');
+    
+    if (savedPosts) this.posts = JSON.parse(savedPosts);
+    if (savedCategories) this.categories = JSON.parse(savedCategories);
+  }
+
+  private save() {
+    localStorage.setItem('posts', JSON.stringify(this.posts));
+    localStorage.setItem('categories', JSON.stringify(this.categories));
   }
 
   getAllPosts(): Post[] {
-    const posts = localStorage.getItem(this.storageKey)
-    return posts ? JSON.parse(posts) : []
+    return this.posts;
   }
 
-  getPost(slug: string): Post | undefined {
-    return this.getAllPosts().find(post => post.slug === slug)
+  getPostBySlug(slug: string): Post | undefined {
+    return this.posts.find(post => post.slug === slug);
+  }
+
+  getPostsByCategory(categoryId: string): Post[] {
+    return this.posts.filter(post => post.categoryId === categoryId);
   }
 
   getAllCategories(): Category[] {
-    const categories = localStorage.getItem(this.categoryKey)
-    return categories ? JSON.parse(categories) : []
+    return this.categories;
   }
 
-  getCategory(slug: string): Category | undefined {
-    return this.getAllCategories().find(category => category.slug === slug)
+  getCategoryBySlug(slug: string): Category | undefined {
+    return this.categories.find(category => category.slug === slug);
   }
 
-  createPost(post: Omit<Post, 'id' | 'slug' | 'createdAt' | 'updatedAt'>): Post {
-    const posts = this.getAllPosts()
-    const now = new Date().toISOString()
-    const newPost: Post = {
-      ...post,
-      id: crypto.randomUUID(),
-      slug: this.generateSlug(post.title),
-      createdAt: now,
-      updatedAt: now
-    }
-    posts.unshift(newPost)
-    localStorage.setItem(this.storageKey, JSON.stringify(posts))
-    return newPost
-  }
-
-  updatePost(id: string, updates: Partial<Post>): Post | undefined {
-    const posts = this.getAllPosts()
-    const index = posts.findIndex(p => p.id === id)
-    if (index === -1) return undefined
-
-    const updatedPost = { 
-      ...posts[index], 
-      ...updates,
-      slug: updates.title ? this.generateSlug(updates.title) : posts[index].slug,
-      updatedAt: new Date().toISOString()
-    }
-    posts[index] = updatedPost
-    localStorage.setItem(this.storageKey, JSON.stringify(posts))
-    return updatedPost
-  }
-
-  deletePost(id: string): boolean {
-    const posts = this.getAllPosts()
-    const filtered = posts.filter(p => p.id !== id)
-    if (filtered.length === posts.length) return false
-    localStorage.setItem(this.storageKey, JSON.stringify(filtered))
-    return true
-  }
-
-  createCategory(category: Omit<Category, 'id' | 'slug'>): Category {
-    const categories = this.getAllCategories()
-    const newCategory: Category = {
-      ...category,
-      id: crypto.randomUUID(),
-      slug: this.generateSlug(category.name)
-    }
-    categories.push(newCategory)
-    localStorage.setItem(this.categoryKey, JSON.stringify(categories))
-    return newCategory
-  }
-
-  updateCategory(id: string, updates: Partial<Category>): Category | undefined {
-    const categories = this.getAllCategories()
-    const index = categories.findIndex(c => c.id === id)
-    if (index === -1) return undefined
-
-    const updatedCategory = { 
-      ...categories[index], 
-      ...updates,
-      slug: updates.name ? this.generateSlug(updates.name) : categories[index].slug
-    }
-    categories[index] = updatedCategory
-    localStorage.setItem(this.categoryKey, JSON.stringify(categories))
-    return updatedCategory
-  }
-
-  deleteCategory(id: string): boolean {
-    const categories = this.getAllCategories()
-    const filtered = categories.filter(c => c.id !== id)
-    if (filtered.length === categories.length) return false
-    localStorage.setItem(this.categoryKey, JSON.stringify(filtered))
-    return true
-  }
-
-  // Initialize with some sample data if empty
   initializeData() {
-    if (this.getAllCategories().length === 0) {
-      this.createCategory({
-        name: 'Technology',
-        description: 'Posts about software development and tech trends'
-      })
-      this.createCategory({
-        name: 'Design',
-        description: 'UI/UX design principles and case studies'
-      })
-    }
+    // Sample categories
+    this.categories = [
+      {
+        id: '1',
+        name: 'React',
+        slug: 'react',
+        description: 'All about React development'
+      },
+      {
+        id: '2',
+        name: 'TypeScript',
+        slug: 'typescript',
+        description: 'TypeScript tips and tricks'
+      }
+    ];
 
-    if (this.getAllPosts().length === 0) {
-      this.createPost({
+    // Sample posts
+    this.posts = [
+      {
+        id: '1',
         title: 'Getting Started with React',
-        content: `React is a popular JavaScript library for building user interfaces. It was developed by Facebook and has become one of the most widely used frontend technologies.
+        slug: 'getting-started-with-react',
+        content: 'React is a popular JavaScript library for building user interfaces...',
+        excerpt: 'Learn the basics of React and start building awesome UIs',
+        coverImage: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&w=1000&q=80',
+        categoryId: '1',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: '2',
+        title: 'TypeScript Best Practices',
+        slug: 'typescript-best-practices',
+        content: 'TypeScript adds static typing to JavaScript...',
+        excerpt: 'Write better TypeScript code with these best practices',
+        coverImage: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?auto=format&fit=crop&w=1000&q=80',
+        categoryId: '2',
+        createdAt: new Date().toISOString()
+      }
+    ];
 
-In this post, we'll cover the basics of React and how to create your first component.
-
-## Why React?
-
-React makes it painless to create interactive UIs. Design simple views for each state in your application, and React will efficiently update and render just the right components when your data changes.
-
-## Creating Your First Component
-
-Here's a simple example of a React component:
-
-\`\`\`jsx
-function Welcome(props) {
-  return <h1>Hello, {props.name}</h1>;
-}
-\`\`\`
-
-This component can be used like this:
-
-\`\`\`jsx
-<Welcome name="Sara" />
-\`\`\`
-
-## Next Steps
-
-In the next post, we'll dive deeper into React hooks and state management.`,
-        excerpt: 'Learn the fundamentals of React and create your first component',
-        categoryId: this.getAllCategories()[0].id,
-        coverImage: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80'
-      })
-    }
+    this.save();
   }
 }
 
-export const postStore = new PostStore()
+export const postStore = new PostStore();

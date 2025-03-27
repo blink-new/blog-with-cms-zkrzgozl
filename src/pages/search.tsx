@@ -1,101 +1,58 @@
 
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { Search as SearchIcon } from 'lucide-react'
-import { postStore } from '../lib/posts'
-import type { Post } from '../lib/posts'
+import { useState } from 'react';
+import { postStore } from '../lib/posts';
+import { Link } from 'react-router-dom';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 
 export function SearchPage() {
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<Post[]>([])
-  const [allPosts, setAllPosts] = useState<Post[]>([])
-
-  useEffect(() => {
-    setAllPosts(postStore.getAllPosts())
-  }, [])
-
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value
-    setQuery(value)
-    
-    if (!value.trim()) {
-      setResults(allPosts)
-      return
-    }
-
-    const searchValue = value.toLowerCase()
-    const filtered = allPosts.filter(post => 
-      post.title.toLowerCase().includes(searchValue) ||
-      post.excerpt.toLowerCase().includes(searchValue) ||
-      post.content.toLowerCase().includes(searchValue)
-    )
-    setResults(filtered)
-  }
-
-  // Initialize with all posts
-  useEffect(() => {
-    setResults(allPosts)
-  }, [allPosts])
+  const [searchTerm, setSearchTerm] = useState('');
+  const posts = postStore.getAllPosts().filter(post => 
+    post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    post.content.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="space-y-8">
-      <div className="relative">
-        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-        <input
-          type="search"
-          placeholder="Search posts..."
-          value={query}
-          onChange={handleSearch}
-          className="w-full pl-10 pr-4 py-2 rounded-md border bg-background"
-        />
-      </div>
+      <header className="text-center py-12">
+        <h1 className="text-4xl font-bold mb-4">Search Posts</h1>
+        <div className="max-w-xl mx-auto">
+          <Input
+            type="search"
+            placeholder="Search posts..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full"
+          />
+        </div>
+      </header>
 
-      <div className="space-y-6">
-        <h2 className="text-2xl font-serif font-bold">
-          {query ? `Search Results for "${query}"` : 'All Posts'}
-        </h2>
-        
-        {results.length === 0 ? (
-          <p className="text-muted-foreground text-center py-8">
-            No posts found. Try a different search term.
-          </p>
-        ) : (
-          <div className="space-y-4">
-            {results.map(post => {
-              const category = postStore.getCategory(post.categoryId)
-              return (
-                <article key={post.id} className="p-4 border rounded-lg">
-                  <div className="flex items-center space-x-2 mb-2">
-                    {category && (
-                      <>
-                        <Link 
-                          to={`/category/${category.slug}`}
-                          className="text-sm text-primary hover:underline"
-                        >
-                          {category.name}
-                        </Link>
-                        <span className="text-muted-foreground">•</span>
-                      </>
-                    )}
-                    <time className="text-sm text-muted-foreground">
-                      {new Date(post.createdAt).toLocaleDateString()}
-                    </time>
-                  </div>
-                  <h3 className="text-xl font-serif font-bold mb-2">
-                    <Link 
-                      to={`/blog/${post.slug}`}
-                      className="hover:text-primary"
-                    >
-                      {post.title}
-                    </Link>
-                  </h3>
-                  <p className="text-muted-foreground">{post.excerpt}</p>
-                </article>
-              )
-            })}
-          </div>
-        )}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {posts.map(post => (
+          <Card key={post.id} className="overflow-hidden group">
+            {post.coverImage && (
+              <div className="aspect-video overflow-hidden">
+                <img
+                  src={post.coverImage}
+                  alt={post.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
+              </div>
+            )}
+            <div className="p-6">
+              <h3 className="text-xl font-semibold mt-2 mb-2 group-hover:text-primary">
+                <Link to={`/blog/${post.slug}`}>{post.title}</Link>
+              </h3>
+              <p className="text-muted-foreground text-sm mb-4">
+                {post.excerpt}
+              </p>
+              <time className="text-sm text-muted-foreground">
+                {new Date(post.createdAt).toLocaleDateString()}
+              </time>
+            </div>
+          </Card>
+        ))}
       </div>
     </div>
-  )
+  );
 }
