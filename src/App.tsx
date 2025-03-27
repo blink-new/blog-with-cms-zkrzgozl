@@ -1,26 +1,21 @@
 
-import { Routes, Route, Navigate } from 'react-router-dom'
-import { ThemeProvider } from './components/theme-provider'
-import { AdminLayout } from './components/admin/layout'
-import Dashboard from './pages/admin/dashboard'
-import PostEditor from './pages/admin/post-editor'
-import MediaLibrary from './pages/admin/media-library'
-import CategoryManager from './pages/admin/category-manager'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Toaster } from "@/components/ui/toaster";
+import Dashboard from './pages/admin/dashboard';
+import PostEditor from './pages/admin/post-editor';
+import MediaLibrary from './pages/admin/media-library';
 
-function App() {
+export default function App() {
   return (
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
-      <Routes>
-        <Route path="/" element={<Navigate to="/admin" replace />} />
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="post-editor" element={<PostEditor />} />
-          <Route path="media-library" element={<MediaLibrary />} />
-          <Route path="category-manager" element={<CategoryManager />} />
-        </Route>
-      </Routes>
-    </ThemeProvider>
-  )
+    <Router>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black text-white">
+        <Routes>
+          <Route path="/admin/dashboard" element={<Dashboard />} />
+          <Route path="/admin/posts/new" element={<PostEditor />} />
+          <Route path="/admin/media" element={<MediaLibrary />} />
+        </Routes>
+        <Toaster />
+      </div>
+    </Router>
+  );
 }
-
-export default App
