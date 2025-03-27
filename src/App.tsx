@@ -8,7 +8,7 @@ import { BlogPost } from "./pages/blog-post"
 import { CategoryPage } from "./pages/category"
 import { SearchPage } from "./pages/search"
 import { PostPage } from "./pages/post"
-import { Admin } from "./pages/admin"
+import { AdminPage } from "./pages/admin"
 import { AdminLayout } from "./components/admin/layout"
 import { Dashboard } from "./pages/admin/dashboard"
 import { PostEditor } from "./pages/admin/post-editor"
@@ -31,7 +31,7 @@ export default function App() {
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<Admin />} />
+            <Route index element={<AdminPage />} />
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="posts" element={<PostEditor />} />
             <Route path="categories" element={<CategoryManager />} />

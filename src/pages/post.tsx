@@ -2,7 +2,7 @@
 import { useParams, Navigate } from 'react-router-dom'
 import { postStore } from '../lib/posts'
 
-export function Post() {
+export function PostPage() {
   const { id } = useParams()
   const post = id ? postStore.getPost(id) : null
 

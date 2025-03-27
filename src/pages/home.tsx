@@ -1,7 +1,7 @@
 
 import { Card } from "@/components/ui/card"
 
-export default function HomePage() {
+export function HomePage() {
   return (
     <div className="space-y-8">
       <section className="text-center py-12">

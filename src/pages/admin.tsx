@@ -7,7 +7,7 @@ import { Textarea } from '../components/ui/textarea'
 import { Card } from '../components/ui/card'
 import { Pencil, Trash2 } from 'lucide-react'
 
-export function Admin() {
+export function AdminPage() {
   const [posts, setPosts] = useState<Post[]>(() => postStore.getAllPosts())
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')

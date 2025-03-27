@@ -39,7 +39,7 @@ const categories = {
   }
 }
 
-export function Category() {
+export function CategoryPage() {
   const { slug } = useParams()
   const category = slug ? categories[slug as keyof typeof categories] : null
 

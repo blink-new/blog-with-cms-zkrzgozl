@@ -22,7 +22,7 @@ const posts = [
   },
 ]
 
-export function Search() {
+export function SearchPage() {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState(posts)
 
