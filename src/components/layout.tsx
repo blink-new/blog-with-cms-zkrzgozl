@@ -1,16 +1,19 @@
 
-import { Outlet } from "react-router-dom"
-import { Navigation } from "./navigation"
-import { Footer } from "./footer"
+import { Footer } from "./footer";
+import { Navigation } from "./navigation";
 
-export function Layout() {
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+export function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
       <main className="flex-1 container mx-auto px-4 py-8">
-        <Outlet />
+        {children}
       </main>
       <Footer />
     </div>
-  )
+  );
 }
