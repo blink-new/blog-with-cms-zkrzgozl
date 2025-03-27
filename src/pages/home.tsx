@@ -1,6 +1,6 @@
 
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Search } from 'lucide-react'
 import { Input } from '../components/ui/input'
 
@@ -14,6 +14,7 @@ const posts = [
     categoryId: '1',
     category: { name: 'React', slug: 'react' },
     createdAt: '2024-02-19T12:00:00Z',
+    content: 'Full article content here...',
   },
   {
     id: '2',
@@ -23,12 +24,14 @@ const posts = [
     categoryId: '2',
     category: { name: 'TypeScript', slug: 'typescript' },
     createdAt: '2024-02-18T12:00:00Z',
+    content: 'Full article content here...',
   },
 ]
 
 export function Home() {
   const [featuredPosts] = useState(posts)
   const [searchQuery, setSearchQuery] = useState('')
+  const navigate = useNavigate()
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-12">
@@ -51,16 +54,20 @@ export function Home() {
           {featuredPosts.map((post) => (
             <article
               key={post.id}
-              className="group relative border border-muted-foreground/10 rounded-lg p-6 transition-all duration-300 hover:bg-muted/50"
+              onClick={() => navigate(`/post/${post.id}`)}
+              className="group relative border border-muted-foreground/10 rounded-lg p-6 transition-all duration-300 hover:bg-muted/50 cursor-pointer"
             >
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-3 text-sm">
-                  <Link
-                    to={`/category/${post.category.slug}`}
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      navigate(`/category/${post.category.slug}`)
+                    }}
                     className="text-primary hover:text-primary/80 transition-colors"
                   >
                     {post.category.name}
-                  </Link>
+                  </span>
                   <span className="text-muted-foreground">
                     {new Intl.DateTimeFormat('en-US', {
                       dateStyle: 'medium',
@@ -69,7 +76,7 @@ export function Home() {
                 </div>
                 
                 <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
-                  <Link to={`/post/${post.id}`}>{post.title}</Link>
+                  {post.title}
                 </h3>
                 
                 <p className="text-muted-foreground line-clamp-2">
