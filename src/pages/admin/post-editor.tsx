@@ -1,84 +1,55 @@
 
-import { useState } from 'react'
-import { Editor } from '@tinymce/tinymce-react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card } from '@/components/ui/card'
-import { Select } from '@/components/ui/select'
-import { Save, Image, Eye } from 'lucide-react'
+import { useState } from "react";
+import { Editor } from "@tinymce/tinymce-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AdminLayout } from "../../components/admin/layout";
+import { Card } from "@/components/ui/card";
 
 export default function PostEditor() {
-  const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
-  const [preview, setPreview] = useState(false)
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
-  const handleSave = () => {
-    // TODO: Implement save functionality
-    console.log('Saving post:', { title, content })
-  }
+  const handleEditorChange = (content: string) => {
+    setContent(content);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    // TODO: Implement post submission
+    console.log({ title, content });
+  };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">Post Editor</h2>
-          <p className="text-muted-foreground">Create and edit your blog posts.</p>
+    <AdminLayout>
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Create New Post</h1>
+          <Button onClick={handleSubmit}>Publish</Button>
         </div>
-        <div className="flex gap-4">
-          <Button variant="outline" onClick={() => setPreview(!preview)}>
-            <Eye className="mr-2 h-4 w-4" />
-            {preview ? 'Edit' : 'Preview'}
-          </Button>
-          <Button onClick={handleSave}>
-            <Save className="mr-2 h-4 w-4" />
-            Save
-          </Button>
-        </div>
-      </div>
 
-      <Card className="p-6">
-        <div className="space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter post title..."
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+        <Card className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label>Category</Label>
-              <Select>
-                <option>Technology</option>
-                <option>Design</option>
-                <option>Business</option>
-              </Select>
+              <label htmlFor="title" className="text-sm font-medium">
+                Post Title
+              </label>
+              <Input
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter post title"
+                className="w-full"
+              />
             </div>
-            <div className="space-y-2">
-              <Label>Status</Label>
-              <Select>
-                <option>Draft</option>
-                <option>Published</option>
-                <option>Archived</option>
-              </Select>
-            </div>
-          </div>
 
-          <div className="min-h-[500px] border rounded-md">
-            {preview ? (
-              <div className="prose max-w-none p-6" dangerouslySetInnerHTML={{ __html: content }} />
-            ) : (
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Content</label>
               <Editor
-                apiKey="your-tinymce-api-key"
-                value={content}
-                onEditorChange={setContent}
+                apiKey="your-api-key" // Replace with your TinyMCE API key
                 init={{
                   height: 500,
-                  menubar: false,
+                  menubar: true,
                   plugins: [
                     'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
                     'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
@@ -88,12 +59,15 @@ export default function PostEditor() {
                     'bold italic forecolor | alignleft aligncenter ' +
                     'alignright alignjustify | bullist numlist outdent indent | ' +
                     'removeformat | help',
+                  content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 16px }'
                 }}
+                value={content}
+                onEditorChange={handleEditorChange}
               />
-            )}
-          </div>
-        </div>
-      </Card>
-    </div>
-  )
+            </div>
+          </form>
+        </Card>
+      </div>
+    </AdminLayout>
+  );
 }
