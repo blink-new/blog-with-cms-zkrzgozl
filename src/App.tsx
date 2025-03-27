@@ -1,6 +1,5 @@
 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Toaster } from "@/components/ui/toaster";
 import Dashboard from './pages/admin/dashboard';
 import PostEditor from './pages/admin/post-editor';
 import MediaLibrary from './pages/admin/media-library';
@@ -14,7 +13,6 @@ export default function App() {
           <Route path="/admin/posts/new" element={<PostEditor />} />
           <Route path="/admin/media" element={<MediaLibrary />} />
         </Routes>
-        <Toaster />
       </div>
     </Router>
   );
