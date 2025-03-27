@@ -5,6 +5,7 @@ import { Navigation } from './components/navigation'
 import { Footer } from './components/footer'
 import { Home } from './pages/home'
 import { Post } from './pages/post'
+import { Admin } from './pages/admin'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/post/:id" element={<Post />} />
+              <Route path="/admin" element={<Admin />} />
             </Routes>
           </main>
           <Footer />

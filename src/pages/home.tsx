@@ -1,94 +1,34 @@
 
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Search } from 'lucide-react'
-import { Input } from '../components/ui/input'
-
-// Temporary mock data
-const posts = [
-  {
-    id: '1',
-    title: 'Getting Started with React',
-    excerpt: 'Learn the basics of React and how to build your first component.',
-    coverImage: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?auto=format&fit=crop&q=80',
-    categoryId: '1',
-    category: { name: 'React', slug: 'react' },
-    createdAt: '2024-02-19T12:00:00Z',
-    content: 'Full article content here...',
-  },
-  {
-    id: '2',
-    title: 'Advanced TypeScript Patterns',
-    excerpt: 'Explore advanced TypeScript patterns and best practices.',
-    coverImage: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80',
-    categoryId: '2',
-    category: { name: 'TypeScript', slug: 'typescript' },
-    createdAt: '2024-02-18T12:00:00Z',
-    content: 'Full article content here...',
-  },
-]
+import { Link } from 'react-router-dom'
+import { postStore } from '../lib/posts'
+import { Card } from '../components/ui/card'
 
 export function Home() {
-  const [featuredPosts] = useState(posts)
-  const [searchQuery, setSearchQuery] = useState('')
-  const navigate = useNavigate()
+  const posts = postStore.getAllPosts()
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 space-y-12">
-      {/* Search Section */}
-      <div className="relative">
-        <Input
-          type="text"
-          placeholder="Search posts..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-background/50 border-muted-foreground/20 pl-10"
-        />
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+    <div className="container mx-auto py-8">
+      <h1 className="text-4xl font-bold mb-8">Blog Posts</h1>
+      <div className="grid gap-6">
+        {posts.map(post => (
+          <Card key={post.id} className="p-6">
+            <h2 className="text-2xl font-bold mb-2">
+              <Link to={`/post/${post.id}`} className="hover:underline">
+                {post.title}
+              </Link>
+            </h2>
+            <p className="text-muted-foreground mb-4">{post.excerpt}</p>
+            <div className="text-sm text-muted-foreground">
+              {new Date(post.createdAt).toLocaleDateString()}
+            </div>
+          </Card>
+        ))}
+        {posts.length === 0 && (
+          <p className="text-center text-muted-foreground py-8">
+            No posts yet. Visit the admin page to create some!
+          </p>
+        )}
       </div>
-
-      {/* Recent Posts */}
-      <section>
-        <h2 className="text-2xl font-bold mb-8">Recent Posts</h2>
-        <div className="space-y-6">
-          {featuredPosts.map((post) => (
-            <article
-              key={post.id}
-              onClick={() => navigate(`/post/${post.id}`)}
-              className="group relative border border-muted-foreground/10 rounded-lg p-6 transition-all duration-300 hover:bg-muted/50 cursor-pointer"
-            >
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-3 text-sm">
-                  <span
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      navigate(`/category/${post.category.slug}`)
-                    }}
-                    className="text-primary hover:text-primary/80 transition-colors"
-                  >
-                    {post.category.name}
-                  </span>
-                  <span className="text-muted-foreground">
-                    {new Intl.DateTimeFormat('en-US', {
-                      dateStyle: 'medium',
-                    }).format(new Date(post.createdAt))}
-                  </span>
-                </div>
-                
-                <h3 className="text-xl font-semibold group-hover:text-primary transition-colors">
-                  {post.title}
-                </h3>
-                
-                <p className="text-muted-foreground line-clamp-2">
-                  {post.excerpt}
-                </p>
-              </div>
-              
-              <div className="absolute inset-0 rounded-lg transition-colors duration-300 group-hover:ring-1 group-hover:ring-primary/20" />
-            </article>
-          ))}
-        </div>
-      </section>
     </div>
   )
 }
