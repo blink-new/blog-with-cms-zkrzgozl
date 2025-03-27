@@ -1,42 +1,41 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { Search as SearchIcon } from 'lucide-react'
-
-// Temporary mock data
-const posts = [
-  {
-    id: '1',
-    title: 'Getting Started with React',
-    excerpt: 'Learn the basics of React and how to build your first component.',
-    categoryId: '1',
-    category: { name: 'React', slug: 'react' },
-    createdAt: '2024-02-19T12:00:00Z',
-  },
-  {
-    id: '2',
-    title: 'Advanced TypeScript Patterns',
-    excerpt: 'Explore advanced TypeScript patterns and best practices.',
-    categoryId: '2',
-    category: { name: 'TypeScript', slug: 'typescript' },
-    createdAt: '2024-02-18T12:00:00Z',
-  },
-]
+import { postStore } from '../lib/posts'
+import type { Post } from '../lib/posts'
 
 export function SearchPage() {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState(posts)
+  const [results, setResults] = useState<Post[]>([])
+  const [allPosts, setAllPosts] = useState<Post[]>([])
+
+  useEffect(() => {
+    setAllPosts(postStore.getAllPosts())
+  }, [])
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setQuery(value)
     
-    // Simple client-side search
-    const filtered = posts.filter(post => 
-      post.title.toLowerCase().includes(value.toLowerCase()) ||
-      post.excerpt.toLowerCase().includes(value.toLowerCase())
+    if (!value.trim()) {
+      setResults(allPosts)
+      return
+    }
+
+    const searchValue = value.toLowerCase()
+    const filtered = allPosts.filter(post => 
+      post.title.toLowerCase().includes(searchValue) ||
+      post.excerpt.toLowerCase().includes(searchValue) ||
+      post.content.toLowerCase().includes(searchValue)
     )
     setResults(filtered)
   }
+
+  // Initialize with all posts
+  useEffect(() => {
+    setResults(allPosts)
+  }, [allPosts])
 
   return (
     <div className="space-y-8">
@@ -53,26 +52,47 @@ export function SearchPage() {
 
       <div className="space-y-6">
         <h2 className="text-2xl font-serif font-bold">
-          {query ? `Search Results for "${query}"` : 'Recent Posts'}
+          {query ? `Search Results for "${query}"` : 'All Posts'}
         </h2>
         
         {results.length === 0 ? (
-          <p className="text-muted-foreground">No posts found.</p>
+          <p className="text-muted-foreground text-center py-8">
+            No posts found. Try a different search term.
+          </p>
         ) : (
           <div className="space-y-4">
-            {results.map(post => (
-              <article key={post.id} className="p-4 border rounded-lg">
-                <div className="flex items-center space-x-2 mb-2">
-                  <span className="text-sm text-primary">{post.category.name}</span>
-                  <span className="text-muted-foreground">•</span>
-                  <time className="text-sm text-muted-foreground">
-                    {new Date(post.createdAt).toLocaleDateString()}
-                  </time>
-                </div>
-                <h3 className="text-xl font-serif font-bold mb-2">{post.title}</h3>
-                <p className="text-muted-foreground">{post.excerpt}</p>
-              </article>
-            ))}
+            {results.map(post => {
+              const category = postStore.getCategory(post.categoryId)
+              return (
+                <article key={post.id} className="p-4 border rounded-lg">
+                  <div className="flex items-center space-x-2 mb-2">
+                    {category && (
+                      <>
+                        <Link 
+                          to={`/category/${category.slug}`}
+                          className="text-sm text-primary hover:underline"
+                        >
+                          {category.name}
+                        </Link>
+                        <span className="text-muted-foreground">•</span>
+                      </>
+                    )}
+                    <time className="text-sm text-muted-foreground">
+                      {new Date(post.createdAt).toLocaleDateString()}
+                    </time>
+                  </div>
+                  <h3 className="text-xl font-serif font-bold mb-2">
+                    <Link 
+                      to={`/blog/${post.slug}`}
+                      className="hover:text-primary"
+                    >
+                      {post.title}
+                    </Link>
+                  </h3>
+                  <p className="text-muted-foreground">{post.excerpt}</p>
+                </article>
+              )
+            })}
           </div>
         )}
       </div>
