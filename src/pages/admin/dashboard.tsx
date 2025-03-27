@@ -1,43 +1,80 @@
 
+import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/card'
-import { FileText, Image, Users, Eye, ArrowUp, ArrowDown } from 'lucide-react'
+import { FileText, Image, FileEdit, Eye, ArrowUp, ArrowDown } from 'lucide-react'
+import { postStore } from '@/lib/posts'
+import { mediaStore } from '@/lib/media'
+import { Post } from '@/lib/types'
+import { formatDistance } from 'date-fns'
 
 export default function Dashboard() {
-  const stats = [
+  const [stats, setStats] = useState({
+    posts: { total: 0, change: '0%' },
+    media: { total: 0, change: '0%' },
+    drafts: { total: 0, change: '0%' },
+    categories: { total: 0, change: '0%' }
+  })
+  const [recentPosts, setRecentPosts] = useState<Post[]>([])
+
+  useEffect(() => {
+    loadDashboardData()
+  }, [])
+
+  const loadDashboardData = () => {
+    const postStats = postStore.getStats()
+    const mediaItems = mediaStore.getAllMedia()
+    
+    setStats({
+      posts: { 
+        total: postStats.publishedPosts,
+        change: '+2.4%' // In a real app, compare with last period
+      },
+      media: { 
+        total: mediaItems.length,
+        change: '+5.7%'
+      },
+      drafts: { 
+        total: postStats.draftPosts,
+        change: '+1.2%'
+      },
+      categories: { 
+        total: postStats.categories,
+        change: '+0.8%'
+      }
+    })
+
+    setRecentPosts(postStats.recentPosts)
+  }
+
+  const statsConfig = [
     { 
-      name: 'Total Posts', 
-      value: '12', 
-      change: '+2.4%',
+      name: 'Published Posts', 
+      value: stats.posts.total, 
+      change: stats.posts.change,
       trend: 'up',
       icon: FileText 
     },
     { 
       name: 'Media Items', 
-      value: '48', 
-      change: '+5.7%',
+      value: stats.media.total, 
+      change: stats.media.change,
       trend: 'up',
       icon: Image 
     },
     { 
-      name: 'Total Views', 
-      value: '2.4k', 
-      change: '-0.3%',
-      trend: 'down',
-      icon: Eye 
+      name: 'Draft Posts', 
+      value: stats.drafts.total, 
+      change: stats.drafts.change,
+      trend: 'up',
+      icon: FileEdit 
     },
     { 
-      name: 'Active Users', 
-      value: '320', 
-      change: '+4.2%',
+      name: 'Categories', 
+      value: stats.categories.total, 
+      change: stats.categories.change,
       trend: 'up',
-      icon: Users 
+      icon: Eye 
     },
-  ]
-
-  const recentPosts = [
-    { id: 1, title: 'Getting Started with Our CMS', date: '2024-02-19', views: 156, status: 'published' },
-    { id: 2, title: 'Best Practices for Content Creation', date: '2024-02-18', views: 98, status: 'draft' },
-    { id: 3, title: 'How to Optimize Your Content', date: '2024-02-17', views: 234, status: 'published' },
   ]
 
   return (
@@ -50,7 +87,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 animate-fade-in">
-        {stats.map((stat, index) => {
+        {statsConfig.map((stat, index) => {
           const Icon = stat.icon
           return (
             <div 
@@ -86,7 +123,7 @@ export default function Dashboard() {
               <div>
                 <h4 className="font-medium text-white">{post.title}</h4>
                 <div className="flex items-center gap-2 text-sm text-white/70">
-                  <span>{post.date}</span>
+                  <span>{formatDistance(new Date(post.createdAt || ''), new Date(), { addSuffix: true })}</span>
                   <span>•</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs ${
                     post.status === 'published' ? 'bg-green-400/20 text-green-400' : 'bg-yellow-400/20 text-yellow-400'
@@ -97,10 +134,16 @@ export default function Dashboard() {
               </div>
               <div className="flex items-center gap-2 text-white/70">
                 <Eye className="h-4 w-4" />
-                <span className="text-sm">{post.views}</span>
+                <span className="text-sm">-</span>
               </div>
             </div>
           ))}
+
+          {recentPosts.length === 0 && (
+            <div className="py-8 text-center text-white/50">
+              No posts yet. Start creating content to see it here.
+            </div>
+          )}
         </div>
       </div>
     </div>
