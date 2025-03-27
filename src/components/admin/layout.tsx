@@ -1,66 +1,75 @@
 
-import { Link, Outlet } from 'react-router-dom'
-import { 
-  LayoutDashboard, 
-  FileEdit, 
-  Image, 
-  FolderTree,
-  LogOut
-} from 'lucide-react'
+import { useState } from 'react'
+import { Link, Outlet, useLocation } from 'react-router-dom'
+import { Menu, X, LayoutDashboard, FileText, Image, FolderTree, Settings } from 'lucide-react'
+import { Button } from '../ui/button'
+import { ModeToggle } from '../mode-toggle'
 
 export function AdminLayout() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const location = useLocation()
+
+  const navigation = [
+    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+    { name: 'Posts', href: '/admin/post-editor', icon: FileText },
+    { name: 'Media', href: '/admin/media-library', icon: Image },
+    { name: 'Categories', href: '/admin/category-manager', icon: FolderTree },
+  ]
+
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen bg-background">
+      {/* Mobile sidebar */}
+      <div className="lg:hidden">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="fixed top-4 left-4 z-50"
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+        >
+          {sidebarOpen ? <X /> : <Menu />}
+        </Button>
+      </div>
+
       {/* Sidebar */}
-      <aside className="w-64 border-r bg-muted/10">
-        <div className="p-6">
-          <Link to="/admin" className="text-2xl font-serif font-bold">
-            Admin
-          </Link>
+      <div className={`
+        fixed inset-y-0 left-0 z-40 w-64 transform bg-card border-r transition-transform duration-200 ease-in-out
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        lg:translate-x-0
+      `}>
+        <div className="flex h-16 items-center justify-between px-4 py-5">
+          <h1 className="text-2xl font-bold">CMS Admin</h1>
+          <ModeToggle />
         </div>
-        <nav className="px-4 py-2 space-y-2">
-          <Link
-            to="/admin"
-            className="flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-muted"
-          >
-            <LayoutDashboard className="h-5 w-5" />
-            <span>Dashboard</span>
-          </Link>
-          <Link
-            to="/admin/posts/new"
-            className="flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-muted"
-          >
-            <FileEdit className="h-5 w-5" />
-            <span>New Post</span>
-          </Link>
-          <Link
-            to="/admin/media"
-            className="flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-muted"
-          >
-            <Image className="h-5 w-5" />
-            <span>Media</span>
-          </Link>
-          <Link
-            to="/admin/categories"
-            className="flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-muted"
-          >
-            <FolderTree className="h-5 w-5" />
-            <span>Categories</span>
-          </Link>
-          <hr className="my-4" />
-          <button
-            className="flex items-center space-x-2 px-4 py-2 rounded-md hover:bg-muted w-full text-left text-red-500"
-          >
-            <LogOut className="h-5 w-5" />
-            <span>Logout</span>
-          </button>
+        <nav className="mt-5 space-y-1 px-2">
+          {navigation.map((item) => {
+            const isActive = location.pathname === item.href
+            const Icon = item.icon
+            return (
+              <Link
+                key={item.name}
+                to={item.href}
+                className={`
+                  group flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors
+                  ${isActive 
+                    ? 'bg-primary text-primary-foreground' 
+                    : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+                  }
+                `}
+              >
+                <Icon className="mr-3 h-5 w-5" />
+                {item.name}
+              </Link>
+            )
+          })}
         </nav>
-      </aside>
+      </div>
 
       {/* Main content */}
-      <main className="flex-1 p-8">
-        <Outlet />
-      </main>
+      <div className="lg:pl-64">
+        <main className="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+          <Outlet />
+        </main>
+      </div>
     </div>
   )
 }
