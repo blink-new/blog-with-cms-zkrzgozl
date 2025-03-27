@@ -39,6 +39,9 @@
     "@react-three/fiber": "^9.0.4",
     "@tanstack/react-query": "^5.69.0",
     "@tiptap/extension-image": "^2.11.5",
+    "@tiptap/extension-link": "^2.11.5",
+    "@tiptap/extension-placeholder": "^2.11.5",
+    "@tiptap/extension-typography": "^2.11.5",
     "@tiptap/pm": "^2.11.5",
     "@tiptap/react": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
@@ -53,6 +56,7 @@
     "react-responsive": "^10.0.0",
     "react-router-dom": "^7.4.0",
     "recharts": "^2.15.1",
+    "sonner": "^2.0.1",
     "tiptap": "^1.32.2",
     "zod": "^3.24.2"
   },
