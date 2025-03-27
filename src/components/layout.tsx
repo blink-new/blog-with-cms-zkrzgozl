@@ -1,12 +1,13 @@
 
-import { Footer } from "./footer";
-import { Navigation } from "./navigation";
+import { ReactNode } from 'react';
+import Navigation from './navigation';
+import Footer from './footer';
 
 interface LayoutProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
-export function Layout({ children }: LayoutProps) {
+export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen flex flex-col">
       <Navigation />
