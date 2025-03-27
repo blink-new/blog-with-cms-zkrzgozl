@@ -5,7 +5,7 @@ import { FileText, Image, FileEdit, Eye, ArrowUp, ArrowDown } from 'lucide-react
 import { postStore } from '@/lib/posts'
 import { mediaStore } from '@/lib/media'
 import { Post } from '@/lib/types'
-import { formatDistance } from 'date-fns'
+import { formatDistanceToNow } from 'date-fns'
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
@@ -77,6 +77,14 @@ export default function Dashboard() {
     },
   ]
 
+  const formatDate = (date: string) => {
+    try {
+      return formatDistanceToNow(new Date(date), { addSuffix: true })
+    } catch (error) {
+      return 'Invalid date'
+    }
+  }
+
   return (
     <div className="space-y-8">
       <div className="animate-slide-up">
@@ -123,7 +131,7 @@ export default function Dashboard() {
               <div>
                 <h4 className="font-medium text-white">{post.title}</h4>
                 <div className="flex items-center gap-2 text-sm text-white/70">
-                  <span>{formatDistance(new Date(post.createdAt || ''), new Date(), { addSuffix: true })}</span>
+                  <span>{post.createdAt ? formatDate(post.createdAt) : 'Recently'}</span>
                   <span>•</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs ${
                     post.status === 'published' ? 'bg-green-400/20 text-green-400' : 'bg-yellow-400/20 text-yellow-400'
