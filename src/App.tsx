@@ -6,7 +6,7 @@ import { Footer } from './components/footer'
 import { Home } from './pages/home'
 import { Post } from './pages/post'
 
-export function App() {
+export default function App() {
   return (
     <ThemeProvider defaultTheme="dark" storageKey="blog-theme">
       <Router>
